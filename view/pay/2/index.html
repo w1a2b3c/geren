@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+ <title>在线支付 - <?php echo $pay_type1 ?> - 网上支付 安全快速！</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" type="text/css" href="/static/pay/2/css/qrcode.css">
+<script src="/static/pay/common.js"></script>
+</head>
+<body>
+<div id="header">
+	<h1>在线支付 - <?php echo $pay_type1 ?> - 网上支付 安全快速！</h1>
+</div>
+<div id="main">
+	<div class="left"<?php if($pay_type_rmb){echo ' style="float: none;margin: 0 auto;"';}?>>
+		<div class="make">
+		    <p><img src="/static/pay/2/img/<?=$type?>-logo.png" alt="" style="height:30px;"></p>
+			<p>商品信息：<?php echo $name;?></p>
+			<p class="money" id="price" style="font-weight:bold; color:green;font-size:20px;"><span style="vertical-align: middle;">¥<?php echo $reallyPrice;?></span> <!--<font color=red style="<?php if($price == $reallyPrice){echo 'display: none;';}?>font-size:14px;vertical-align: middle;">(不可多付或少付)</font>--></p>
+            <div class="qrcode" id="qrcode">
+                <?php if($zf_pid && $pay_type_ali){?>
+                            <?php if($confirm == 1){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo urlencode($http_type.$_SERVER['HTTP_HOST'].'/index/pay/goAlipay?trade_no='.$order_id);?>">
+                            <?php }else if($transfer == 1){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=http://ds.alipay.com/?scheme=<?php echo urlencode("alipays://platformapi/startapp?appId=09999988&actionType=toAccount&goBack=NO&amount=$reallyPrice&userId=$zf_pid&memo=$id");?>">
+                            <?php }else if($transfer == 2){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=http://ds.alipay.com/?scheme=<?php echo urlencode("alipays://platformapi/startapp?appId=20000123&actionType=scan&biz_data={\"s\":\"money\",\"u\":\"$zf_pid\",\"a\":\"$reallyPrice\",\"m\":\"$id\"}");?>">
+                            <?php }else if($transfer == 3){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=http://ds.alipay.com/?scheme=alipays%3a%2f%2fplatformapi%2fstartapp%3fappId%3d77700259%26page%3dpages%252Ftransfer%252Ftransfer%253Famount%253D<?php echo $reallyPrice;?>%2526chInfo%253DmoneyBox%2526remark%253D<?php echo $id;?>%2526uid%253D<?php echo $zf_pid;?>">
+                            <?php }else{?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo urlencode($payUrl);?>">
+                            <?php }?>
+                            <?php }else if($payUrl){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo urlencode($payUrl);?>">
+                            <?php }?>
+                             <?php if($pay_type_rmb){?>
+                             <?php if(request()->isMobile()){?>
+                             <p style="font-size: 20px;">钱包编码：<strong><?php echo $zf_pid;?></strong></p>
+                             <?php }else{?>
+                             <p style="font-size: 20px;margin-top: 10px;">使用浏览器扫描以下二维码</p>
+                             <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo $url;?>" style="width: 250px;">
+                             <?php }}?>
+                </div>
+       <center>
+            <?php if($pay_type_wx || $pay_type_qq || ($pay_type_rmb && $payUrl)){?>
+            <div class="open_app">
+                <a href="javascript:;" class="btn btn-lg btn-block btn-success picture" style="font-size:13px">保存二维码</a>
+            </div>
+                <?php }?>
+                <?php if($pay_type_wx){?>
+                <div class="open_app">
+                <a href="weixin://" class="btn btn-lg btn-block btn-success" style="font-size:13px" >唤醒微信APP支付</a>
+            </div>
+                <?php }?>
+			 <?php if($pay_type_ali){?>
+			 <div class="open_app">
+                <a id="alipay" href="javascript:;" class="btn btn-lg btn-block btn-success" style="font-size:13px" >唤醒支付宝APP支付</a>
+            </div>
+                <?php }?>
+            <?php if($pay_type_rmb){?>
+            <div class="open_app">
+                <a href="javascript:;" class="btn btn-lg btn-block btn-success copy-text" copy="<?php echo $zf_pid;?>" style="font-size:13px" >复制钱包编码</a>
+            </div>
+            <div class="open_app">
+                <a href="javascript:;" class="btn btn-lg btn-block btn-success copy-text" style="font-size:13px" >复制金额</a>
+            </div>
+                <?php }?>
+                <?php if(get_setting('mail_order_bd')){?>
+                <div class="open_app" style="display: block">
+                    <a id="submitBd" href="javascript:;" class="btn btn-lg btn-block btn-success" style="font-size:13px" >提交补单</a>
+                </div>
+                <?php }?>
+		</center>
+			<div class="info">
+				<p id="divTime">正在获取中,请稍等...</p>
+				<p>平台订单号：<?php echo $order_id;?></p>
+				<?php if($pay_type_rmb){?>
+				<p>请使用<?=$pay_type1?>，找到转钱，输入钱包编码，再输入金额转账即可</p>
+				<?php }else{?>
+				<p>请使用<?=$pay_type1?>扫一扫</p>
+				<?php }?>
+			</div>
+		</div>
+	</div>
+	<div class="right">
+		<img src="/static/pay/2/img/<?=$type?>-sys.png" alt="">
+	</div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="/static/common/js/jquery.min.js"></script>
+<script src="/static/common/lib/layer/layer.js"></script>
+     <script type="text/javascript">
+     function timer(intDiff){
+         window.setInterval(function(){
+         var day=0,
+             hour=0,
+             minute=0,
+             second=0;//时间默认值       
+         if(intDiff > 0){
+         	day = Math.floor(intDiff / (60 * 60 * 24));
+             hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+             minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+            second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+         }
+		if (minute <= 9) minute = '0' + minute;
+		if (second <= 9) second = '0' + second;
+		if (hour <= 0 && minute <= 0 && second <= 0) {
+			$("#divTime").html("<small style='color:red; font-size:26px'>订单二维码已过期</small>");
+			$("#qrcode").html('<img id="qrcode_load" src="/static/pay/2/img/qrcode_timeout.png">');//输出过期二维码提示图片
+		}else{
+			$("#divTime").html("二维码有效时间:<small style='color:red; font-size:26px'>" + minute + "</small>分<small style='color:red; font-size:26px'>" + second + "</small>秒，失效勿付<?php if($pay_type_ali && $money_change == 1){echo '，备注：'.$id;}?>");
+		}
+		intDiff--
+		}, 1000);
+     } 
+</script>
+<?php require(ROOT_PATH.'view'.DS.'pay'.DS.'foot.html');?>
+</body></html>

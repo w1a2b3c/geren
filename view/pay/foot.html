@@ -1,0 +1,155 @@
+<script>
+    var time = new Date().getTime() - <?php echo strtotime($create_time);?> * 1000;
+    time = time / 1000;
+    time = <?php echo get_setting('order_timeout');?> * 60 - time;
+
+    if (<?php echo $status;?> == 3) {
+        time = 0;
+    }
+    timer(time);
+    check();
+
+    function check() {
+        $.post("/checkOrder", "orderId=<?php echo $order_id;?>", function(res) {
+            // console.log(res);
+            if (res.code == 1) {
+                $("#divTime").html("<small style='color:red; font-size:22px'>"+ res.msg +"</small>");
+                $("#qrcode").html('<img id="qrcode_load" src="/static/pay/3/img/pay_ok.png">');
+                $(".zf-status").html('<button>已支付</button>');
+                layer.msg("支付成功，正在跳转中...",{time: 1500,icon: 1},function(){
+                    userAgent = navigator.userAgent;
+                    if(userAgent.indexOf('Alipay') != -1){
+                        alert(res.msg);
+                        window.open("","_self").close()
+                    }else{
+                        location.href = res.data.url;
+                    }
+                });
+            } else {
+                if (res.msg == "已过期") {
+                    intDiff = 0;
+                    var timeout_url = '<?php echo get_setting('timeout_url');?>';
+                    if(timeout_url){
+                        location.href = timeout_url;
+                    }
+                } else {
+                    setTimeout("check()", 1500);
+                }
+            }
+        })
+    }
+    
+    <?php if($price != $reallyPrice){?>
+    var index = layer.alert('温馨提示：<?php echo $price;?>元已被其他用户占用，请您务必付款<font color=red><?php echo $reallyPrice;?></font>元，<font color=red>多付一分或者少付一分都不能到账</font>！', {
+        icon: 7,
+        skin: 'layer-ext-moon', //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅
+    },function(){
+        layer.close(index);
+        <?php if(get_setting('popup')){?>
+        var text = '<?php echo get_setting('prompt');?>';
+        if(text){
+            layer.alert(text); 
+        }
+        <?php }?>
+    });
+    <?php }else{?>
+        <?php if(get_setting('popup')){?>
+        var text = '<?php echo get_setting('prompt');?>';
+        if(text){
+            layer.alert(text); 
+        }
+        <?php }?>
+    <?php }?>
+
+    function copyText(text = '',suts = true){
+        text = text ? text : '<?php echo $reallyPrice;?>';
+        var res = copyToClip(text);
+        if(!res){
+            layer.msg('复制失败，请手动复制',{time: 1500,icon: 2});
+        }else if(suts){
+           layer.msg('复制成功',{time: 1500,icon: 1});
+        }
+    }
+
+    <?php if($pay_type_ali && $zf_pid && $transfer && $status == 0 && request()->isMobile()){?>
+    // alipays://platformapi/startapp?appId=20000067&url=
+    // http://ds.alipay.com/?scheme=
+    // https://render.alipay.com/p/s/i?scheme=
+        <?php if($confirm == 1){?>
+        $("#alipay").attr('href','alipays://platformapi/startapp?appId=20000067&url=<?php echo urlencode($http_type.$_SERVER['HTTP_HOST'].'/index/pay/goAlipay?trade_no='.$order_id);?>');
+        <?php }else{?>
+        url = $("#show-qrcode").attr('src').replace(/\/enQrcode\?url=http:\/\/ds.alipay.com\/\?scheme=/g,"");
+        $("#alipay").attr('href',"http://ds.alipay.com/?scheme="+url);
+        <?php }?>
+    <?php }else if($pay_type_ali && (!$zf_pid || !$transfer) && $status == 0 && request()->isMobile()){?>
+    $('#alipay').on('click',function() {
+        copyText();
+    })
+    $("#alipay").attr('href','alipays://platformapi/startapp?appId=20000067&url=<?php echo urlencode($payUrl);?>');
+    <?php }?>
+    <?php if($status == 0 && request()->isMobile()){?>
+    $('.picture').on('click',function(){
+        copyText();
+        savePicture($('#show-qrcode').attr('src'));
+    })
+    <?php }?>
+    <?php if($status == 0 && request()->isMobile()){?>
+    var triggerEvent = "touchstart";
+    function savePicture(Url){
+        var blob=new Blob([''], {type:'application/octet-stream'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = Url;
+        a.download = Url.replace(/(.*\/)*([^.]+.*)/ig,"$2").split("?")[0];
+        var e = document.createEvent('MouseEvents');
+        e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        a.dispatchEvent(e);
+        URL.revokeObjectURL(url);
+    }
+    <?php }?>
+    <?php if(request()->isMobile()){?>
+        $('.open_app').show();
+    <?php }?>
+    
+    $('#submitBd').on('click',function(){
+        layer.prompt({title: '请输入你的邮箱，不填输入0', formType: 3}, function(email, index){
+            layer.close(index);
+            // console.log(email);
+            layer.load(3);
+            $.post('/submitBd',{payId: '<?php echo $order_id;?>',email: email},function(res){
+                if(res.code == 1){
+                    layer.msg("提交补单成功，等待核实中",{time: 1500,icon: 1});
+                }else{
+                    layer.msg(res.msg,{time: 1500,icon: 2});
+                }
+                layer.closeAll('loading');
+            })
+        });
+    })
+    $('.copy-text').on('click',function(){
+        copyText($(this).attr("copy"));
+    })
+    <?php if($status == 0 && stripos($ua,'alipay') === false && $voice == 1){?>
+        var text = '<?php echo get_setting('voice_text');?>'.replace('{money}','<?php echo $reallyPrice;?>');
+        if(text){
+            $('body').append('<audio autoplay><source src="https://api.vvhan.com/api/song?txt='+text+'" type="audio/mpeg">您的浏览器不支持 audio 元素。</audio>');
+        }
+    <?php }?>
+    
+    /**
+     * 复制单行内容到粘贴板
+     * content : 需要复制的内容
+     */
+    function copyToClip(content) {
+        var res = true;
+        var aux = document.createElement("input");
+        aux.setAttribute("value", content);
+        document.body.appendChild(aux);
+        aux.select();
+        if (!document.execCommand("copy")) {
+            res = false;
+        }
+        document.body.removeChild(aux);
+        return res;
+    }
+    </script>

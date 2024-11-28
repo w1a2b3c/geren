@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Language" content="zh-cn" />
+  <meta name="apple-mobile-web-app-capable" content="no" />
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <meta name="format-detection" content="telephone=no,email=no" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+  <meta name="renderer" content="webkit" />
+  <meta name="force-rendering" content="webkit" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+  <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-control" content="no-cache" />
+  <meta http-equiv="Cache" content="no-cache" />
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+  <link rel="stylesheet" href="/static/pay/4/css/main.css">
+  <title>收银台</title>
+  <script src="/static/pay/common.js"></script>
+</head>
+
+<body>
+  <div class="box" id="body">
+    <!--<div id="loading_all"
+      style=" width:100%; height:100%; position:fixed; top: 0; left: 0; z-index:999; background-color:white;">
+      <div style="position:absolute; width:60px; height:60px; top:50%; margin-top:-60px; left:50%; margin-left:-30px;">
+        <img src="./img/loading.gif" class="img-responsive">
+      </div>
+    </div>-->
+    <div class="box-head" id="title">
+      <h4 class="box-title"><?php echo $pay_type1;?>收银台 收款方：<?php echo get_setting('title');?>
+        <a href="javascript:;" title="点击这里联系客服" alt="点击这里联系客服" onclick="location.href = 'http://wpa.qq.com/msgrd?v=3&uin=<?php echo get_setting('qq');?>&site=qq&menu=yes';">联系客服</a>
+      </h4>
+    </div>
+    <div class="box-main">
+      <div id="orderbody">
+        <span class="payid">平台订单号: <?php echo $order_id;?><?php if($pay_type_ali && $money_change == 1){echo '，备注：'.$id;}?></span>
+        <div class="box-main-logo">
+            <?php if($pay_type_wx){?>
+          <span class="ico_log ico-1"></span>
+          <?php }else if($pay_type_ali){?>
+          <span class="ico_log ico-2"></span>
+          <?php }else if($pay_type_qq){?>
+          <span class="ico_log ico-3"></span>
+          <?php }else if($pay_type_rmb){?>
+          <span class="ico_log ico-4"></span>
+          <?php }?>
+        </div>
+        <p class="box-main-font1">扫一扫付款（元）</p>
+        <div class="amount" id="money">￥<?php echo $reallyPrice;?></div>
+        <!--<p class="box-main-font1">支付时请在备注中填写自己的QQ号</p>-->
+        <div class="qrcode">
+          <div class="qrcode-img-wrapper">
+            <div id="timeOut"
+              style="width: 182px;height: 232px; background: rgba(255, 255, 255, 0.9); display: none; position: absolute; text-align: center;">
+              <p style="color: red; margin-top: 50px;">订单已过期 <br />请返回网站重新发起支付</p>
+            </div>
+            <?php if($zf_pid && $pay_type_ali){?>
+                            <?php if($confirm == 1){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo urlencode($http_type.$_SERVER['HTTP_HOST'].'/index/pay/goAlipay?trade_no='.$order_id);?>">
+                            <?php }else if($transfer == 1){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=http://ds.alipay.com/?scheme=<?php echo urlencode("alipays://platformapi/startapp?appId=09999988&actionType=toAccount&goBack=NO&amount=$reallyPrice&userId=$zf_pid&memo=$id");?>">
+                            <?php }else if($transfer == 2){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=http://ds.alipay.com/?scheme=<?php echo urlencode("alipays://platformapi/startapp?appId=20000123&actionType=scan&biz_data={\"s\":\"money\",\"u\":\"$zf_pid\",\"a\":\"$reallyPrice\",\"m\":\"$id\"}");?>">
+                            <?php }else if($transfer == 3){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=http://ds.alipay.com/?scheme=alipays%3a%2f%2fplatformapi%2fstartapp%3fappId%3d77700259%26page%3dpages%252Ftransfer%252Ftransfer%253Famount%253D<?php echo $reallyPrice;?>%2526chInfo%253DmoneyBox%2526remark%253D<?php echo $id;?>%2526uid%253D<?php echo $zf_pid;?>">
+                            <?php }else{?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo urlencode($payUrl);?>">
+                            <?php }?>
+                            <?php }else if($payUrl){?>
+                            <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo urlencode($payUrl);?>">
+                            <?php }?>
+          </div>
+          <div class="qrcode-footer">
+              <?php if($pay_type_wx || $pay_type_qq){?>
+            <div class="ico-scan-1"></div>
+            <?php }else if($pay_type_ali){?>
+            <div class="ico-scan-2"></div>
+            <?php }else if($pay_type_rmb){?>
+            <div class="ico-scan-4"></div>
+            <?php }?>
+            <div class="qrcode-right">
+              <span class="font">打开手机<?php echo $pay_type1;?></span>
+              <span class="font">扫一扫继续付款</span>
+            </div>
+          </div>
+        </div>
+        <?php if($pay_type_rmb){?>
+         <?php if(request()->isMobile()){?>
+         <p style="font-size: 20px;text-align: center;">钱包编码：<strong><?php echo $zf_pid;?></strong></p>
+         <?php }else{?>
+         <p style="font-size: 20px;margin-top: 10px;text-align: center;">使用浏览器扫描以下二维码</p>
+         <img id='show-qrcode' alt="加载中..." src="/enQrcode?url=<?php echo $url;?>" style="width: 200px;margin: 0 auto;display: block;">
+         <?php }echo '<style>.qrcode,.box-main-font1{display: none;}</style>';}?>
+        <div class="time">
+          <strong id="hour_show">0时</strong>
+          <strong id="minute_show">0分</strong>
+          <strong id="second_show">0秒</strong>
+        </div>
+        <div class="box-main-footer">
+          <div class="data-time">
+            <span>创建时间: <?php echo $create_time;?></span>
+          </div>
+          <!--<div class="status">
+            <div class="statusli">
+              <div class="status-font">
+                <span class="reallyprice-font">应付金额:</span>
+                <span class="reallyprice">￥ <?php echo $reallyPrice;?></span>
+              </div>
+              <div class="status-btn">
+                <button disabled="disabled">等待支付...</button>
+              </div>
+            </div>
+          </div>-->
+          <div class="m-btn zf-status">
+            <button disabled="disabled" style="background-color: #89e7b3;">等待支付...</button>
+          </div>
+        </div>
+        <?php if($price != $reallyPrice){?>
+        <div class="time-item" id="msg">
+          <h4 class="tip">
+            <span style="color: red">原金额 <?php echo $price;?> 元 为了您正常支付 请务必付款 <?php echo $reallyPrice;?> 元 </span>
+          </h4>
+        </div>
+        <?php }?>
+        <?php if(request()->isMobile() && $pay_type_rmb){?>
+        <div style="margin: 20px 0 10px;">
+          <h4 class="tip">
+          <span>请使用<?php echo $pay_type1?>，找到转钱，输入钱包编码，再输入金额转账即可</span>
+          </h4>
+        </div>
+        <?php }?>
+        <div style="text-align: center;">
+        <?php if(request()->isMobile() && ($pay_type_wx || $pay_type_qq || ($pay_type_rmb && $payUrl))){?>
+                <div class="open_app m-btn" style="width: auto;display: inline-block;">
+                    <a class="picture">保存二维码</a>
+                </div>
+                <?php }?>
+                <?php if(request()->isMobile() && $pay_type_wx){?>
+                <div class="open_app m-btn" style="width: auto;display: inline-block;">
+                    <a href="weixin://">启动微信</a>
+                </div>
+                <?php }?>
+			 <?php if(request()->isMobile() && $pay_type_ali){?>
+			 <div class="open_app m-btn" style="width: auto;display: inline-block;">
+                    <a id="alipay" href="">启动支付宝</a>
+                </div>
+                <?php }?>
+            <?php if(request()->isMobile() && $pay_type_rmb){?>
+            <div class="open_app m-btn" style="width: auto;display: inline-block;">
+                    <a class="copy-text" copy="<?php echo $zf_pid;?>">复制钱包编码</a>
+                </div>
+                <div class="open_app m-btn" style="width: auto;display: inline-block;">
+                    <a class="copy-text">复制金额</a>
+                </div>
+                <?php }?>
+                <?php if(get_setting('mail_order_bd')){?>
+                <div class="open_app m-btn" style="width: auto;display: inline-block;">
+                    <a id="submitBd">提交补单</a>
+                </div>
+                <?php }?>
+            </div>
+      </div>
+    </div>
+    <script src="/static/common/js/jquery.min.js"></script>
+    <script src="/static/common/lib/layer/layer.js"></script>
+    <script>
+    function aaa() {
+        if ($('#orderDetail').hasClass('detail-open')) {
+            $('#orderDetail .detail-ct').slideUp(500, function() {
+                $('#orderDetail').removeClass('detail-open');
+            });
+        } else {
+            $('#orderDetail .detail-ct').slideDown(500, function() {
+                $('#orderDetail').addClass('detail-open');
+            });
+        }
+    }
+
+    var myTimer;
+
+    function timer(intDiff) {
+        var i = 0;
+        i++;
+        var day = 0,
+            hour = 0,
+            minute = 0,
+            second = 0; //时间默认值
+        if (intDiff > 0) {
+            day = Math.floor(intDiff / (60 * 60 * 24));
+            hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+            minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+            second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+        }
+        if (minute <= 9) minute = '0' + minute;
+        if (second <= 9) second = '0' + second;
+        $('#hour_show').html('<s id="h"></s>' + hour + '时');
+        $('#minute_show').html('<s></s>' + minute + '分');
+        $('#second_show').html('<s></s>' + second + '秒');
+        if (hour <= 0 && minute <= 0 && second <= 0) {
+            qrcode_timeout()
+            clearInterval(myTimer);
+
+        }
+        intDiff--;
+
+        myTimer = window.setInterval(function() {
+            i++;
+            var day = 0,
+                hour = 0,
+                minute = 0,
+                second = 0; //时间默认值
+            if (intDiff > 0) {
+                day = Math.floor(intDiff / (60 * 60 * 24));
+                hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+                minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+                second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+            }
+            if (minute <= 9) minute = '0' + minute;
+            if (second <= 9) second = '0' + second;
+            $('#hour_show').html('<s id="h"></s>' + hour + '时');
+            $('#minute_show').html('<s></s>' + minute + '分');
+            $('#second_show').html('<s></s>' + second + '秒');
+            if (hour <= 0 && minute <= 0 && second <= 0) {
+                qrcode_timeout()
+                clearInterval(myTimer);
+            }
+            intDiff--;
+        }, 1000);
+    }
+
+    function qrcode_timeout() {
+        document.getElementById("timeOut").style.display = "block";
+        $('.zf-status').html('<button disabled="disabled" style="background-color: #89e7b3;">订单已过期</button>');
+    }
+    </script>
+    <?php require(ROOT_PATH.'view'.DS.'pay'.DS.'foot.html');?>
+</body>
+
+
+</html>

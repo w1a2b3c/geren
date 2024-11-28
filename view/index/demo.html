@@ -1,0 +1,144 @@
+
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="applicable-device" content="pc,mobile">
+<link href="/favicon.ico" rel="shortcut icon">
+<title>支付体验中心-{$title}</title>
+<script src="/static/web/js/jquery.min.js"></script>
+<link rel="stylesheet" href="/static/web/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/web/css/demo.css">
+<link rel="stylesheet" href="/static/web/css/m_reset.css">
+</head>
+<body>
+
+<div class="container">
+   <div class="row">
+
+    <div class="col-lg-12 col-sx-12">
+        <div class="head">
+   <!-- <a href="index.html"><img src="/static/admin/images/logo.png" width="150px" alt=""></a> -->
+   <span class="head-title">体验Demo</span>
+   <span style="float: right"><a href="">商户申请</a> | <a target="_blank" href="index.html">返回首页</a></span>
+
+</div>        <div class="content">
+            <div class="content-head">
+                <div class="order">
+
+                <span class="sleft">订单编号：<?php echo date("YmdHms") . mt_rand(0, 9) . mt_rand(0, 9) . mt_rand(0, 9) . mt_rand(0, 9) . mt_rand(0, 9); ?></span>
+                <span class="sright">收款商家：{$title}</span>
+            </div>
+            </div>
+
+            <div class="step step2">
+                <ul class="steps clearfix">
+                    <li>选择商品</li>
+                    <li class="active">确认付款</li>
+                    <li>下单成功</li>
+
+                </ul>
+            </div>
+
+            <div class="pay_amount">
+                <span class="amount_text">支付金额:</span>
+                <span class="amount font-red">￥<input size="30" name="money" value="<?php echo bcdiv(mt_rand(1,100),100,2);?>" style="background-color:transparent;border:0;width:64px;color: #ec3f3f;"></span>
+            </div>
+
+
+
+            <div class="order" style="margin-top: 20px;margin-bottom: 5px;">
+                <span class="address-title">请选择付款方式</span>
+            </div>
+
+            <div class="ways">
+                <div class="borders wechat_pay" style="text-align: center" checked="">
+                   <p>
+                       <img src="/static/web/picture/wx_pay.svg" style="margin:0 auto;width:34px" alt=""><span style="margin-left: 7px;font-size: 13px;color:#878787;">微信支付</span>
+                   </p>
+                </div>
+                <div class="borders ali_pay">
+                    <p><img src="/static/web/picture/alipay.svg" style="margin:0 auto;width:80px" alt=""> </p>
+                </div>
+                <div class="borders qq_pay">
+                    <p><img src="/static/web/picture/qqpay.png" style="margin:0 auto;width:110px" alt=""> </p>
+                </div>
+                <div class="borders rmb_pay">
+                    <p><img src="/static/web/picture/rmbpay.png" style="margin:0 auto;width:110px" alt=""> </p>
+                </div>
+            </div>
+
+            <div class="go-pay">
+                <span style="margin-right: 10px">测试体验商品不会发货</span>
+                <button class="buy-button" style="width: 100px;">立即支付</button>
+            </div>
+        </div>
+
+        <div class="foot">
+    <p> {$footer|raw}</p>
+</div>    </div>
+
+</div>
+</div>
+
+<script>
+    var flag = 0;
+    var type = '';
+    var out_trade_no = $('.sleft').text().substr($('.sleft').text().lastIndexOf("：") + 1);
+    $(document).ready(function(){
+	        $('.wechat_pay').addClass('click_active');
+	        $('.ali_pay').removeClass('click_active');
+	        $('.qq_pay').removeClass('click_active');
+            $('.rmb_pay').removeClass('click_active');
+	        flag = 1;
+	        type = 'wxpay';
+	});
+    $('.wechat_pay').on('click',function () {
+        $('.wechat_pay').addClass('click_active');
+        $('.ali_pay').removeClass('click_active');
+        $('.qq_pay').removeClass('click_active');
+        $('.rmb_pay').removeClass('click_active');
+        flag = 1;
+        type = 'wxpay';
+    })
+
+    $('.ali_pay').on('click',function () {
+        $('.ali_pay').addClass('click_active');
+        $('.wechat_pay').removeClass('click_active');
+        $('.qq_pay').removeClass('click_active');
+        $('.rmb_pay').removeClass('click_active');
+        flag = 1;
+        type = 'alipay';
+    });
+    
+    $('.qq_pay').on('click',function () {
+        $('.qq_pay').addClass('click_active');
+        $('.wechat_pay').removeClass('click_active');
+        $('.ali_pay').removeClass('click_active');
+        $('.rmb_pay').removeClass('click_active');
+        flag = 1;
+        type = 'qqpay';
+    });
+
+    $('.rmb_pay').on('click',function () {
+        $('.rmb_pay').addClass('click_active');
+        $('.wechat_pay').removeClass('click_active');
+        $('.ali_pay').removeClass('click_active');
+        $('.qq_pay').removeClass('click_active');
+        flag = 1;
+        type = 'rmbpay';
+    });
+
+    $('.go-pay').on('click',function () {
+        if(flag == 0) {
+            swal('请先选择支付方式');
+        } else {
+            window.location.href = '/index/index/demo?type='+ type+'&out_trade_no='+out_trade_no+'&money='+$('[name="money"]').val();
+        }
+    })
+</script>
+
+
+</body>
+</html>
